@@ -3,20 +3,51 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/temperature_formatter.dart';
+import '../../../data/models/weather_data.dart';
 import '../providers/settings_provider.dart';
 import '../providers/weather_provider.dart';
 import '../providers/weather_state.dart';
 import '../widgets/current_weather_view.dart';
 import '../widgets/forecast_list_view.dart';
+import '../widgets/hourly_forecast_carousel.dart';
 import '../widgets/location_selection_dialog.dart';
 import '../widgets/offline_banner.dart';
 import '../widgets/recent_searches_view.dart';
+import '../widgets/theme_selector_sheet.dart';
+import '../widgets/uv_and_precipitation_card.dart';
 import '../widgets/weather_empty_state.dart';
 import '../widgets/weather_error_view.dart';
 import '../widgets/weather_search_bar.dart';
 
 class WeatherScreen extends ConsumerWidget {
   const WeatherScreen({super.key});
+
+  Widget _buildWeatherTelemetry(WeatherData data, TemperatureUnit unit) {
+    final todayForecast =
+        data.dailyForecast.isNotEmpty ? data.dailyForecast.first : null;
+
+    return Column(
+      children: [
+        CurrentWeatherView(data: data, unit: unit),
+        if (data.hourlyForecast.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          HourlyForecastCarousel(
+            hourlyForecast: data.hourlyForecast,
+            unit: unit,
+          ),
+          const SizedBox(height: 16),
+          UvAndPrecipitationCard(
+            hourly: data.hourlyForecast,
+            uvIndexMax: todayForecast?.uvIndexMax ?? 0.0,
+            precipitationSum: todayForecast?.precipitationSum ?? 0.0,
+            surfacePressure: data.current.surfacePressure,
+          ),
+        ],
+        const SizedBox(height: 16),
+        ForecastListView(forecast: data.dailyForecast, unit: unit),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -101,9 +132,9 @@ class WeatherScreen extends ConsumerWidget {
             ),
           ),
 
-          // Theme mode cycle button
+          // Theme selector button with dedicated modal sheet
           IconButton(
-            tooltip: 'Toggle Theme',
+            tooltip: 'Appearance & Theme',
             icon: Icon(
               switch (settings.themeMode) {
                 ThemeMode.dark => Icons.dark_mode_rounded,
@@ -117,7 +148,13 @@ class WeatherScreen extends ConsumerWidget {
                       : AppColors.lightTextPrimary,
             ),
             onPressed: () {
-              ref.read(settingsProvider.notifier).cycleThemeMode();
+              ThemeSelectorSheet.show(
+                context: context,
+                currentMode: settings.themeMode,
+                onSelectMode: (mode) {
+                  ref.read(settingsProvider.notifier).setThemeMode(mode);
+                },
+              );
             },
           ),
           const SizedBox(width: 8),
@@ -137,9 +174,14 @@ class WeatherScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Search Field
+                // Search Field with GPS Button
                 WeatherSearchBar(
                   isLoading: isSearching || isLoadingData,
+                  onCurrentLocation: () {
+                    ref
+                        .read(weatherNotifierProvider.notifier)
+                        .fetchCurrentLocationWeather();
+                  },
                   onSearch: (query) {
                     ref
                         .read(weatherNotifierProvider.notifier)
@@ -184,7 +226,7 @@ class WeatherScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'SEARCHING LOCATIONS FOR "$query"...',
+                            'SEARCHING FOR "$query"...',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
@@ -223,15 +265,7 @@ class WeatherScreen extends ConsumerWidget {
                         ),
                         if (previousData != null) ...[
                           const SizedBox(height: 12),
-                          CurrentWeatherView(
-                            data: previousData,
-                            unit: settings.unit,
-                          ),
-                          const SizedBox(height: 16),
-                          ForecastListView(
-                            forecast: previousData.dailyForecast,
-                            unit: settings.unit,
-                          ),
+                          _buildWeatherTelemetry(previousData, settings.unit),
                         ],
                       ],
                     ),
@@ -281,17 +315,8 @@ class WeatherScreen extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        if (previousData != null) ...[
-                          CurrentWeatherView(
-                            data: previousData,
-                            unit: settings.unit,
-                          ),
-                          const SizedBox(height: 16),
-                          ForecastListView(
-                            forecast: previousData.dailyForecast,
-                            unit: settings.unit,
-                          ),
-                        ],
+                        if (previousData != null)
+                          _buildWeatherTelemetry(previousData, settings.unit),
                       ],
                     ),
 
@@ -307,15 +332,7 @@ class WeatherScreen extends ConsumerWidget {
                                 .refresh();
                           },
                         ),
-                      CurrentWeatherView(
-                        data: weatherData,
-                        unit: settings.unit,
-                      ),
-                      const SizedBox(height: 16),
-                      ForecastListView(
-                        forecast: weatherData.dailyForecast,
-                        unit: settings.unit,
-                      ),
+                      _buildWeatherTelemetry(weatherData, settings.unit),
                     ],
                   ),
 
@@ -380,15 +397,7 @@ class WeatherScreen extends ConsumerWidget {
                               ],
                             ),
                           ),
-                          CurrentWeatherView(
-                            data: cachedData,
-                            unit: settings.unit,
-                          ),
-                          const SizedBox(height: 16),
-                          ForecastListView(
-                            forecast: cachedData.dailyForecast,
-                            unit: settings.unit,
-                          ),
+                          _buildWeatherTelemetry(cachedData, settings.unit),
                         ] else
                           WeatherErrorView(
                             message: message,

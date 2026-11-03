@@ -4,11 +4,13 @@ import '../../../core/theme/app_theme.dart';
 
 class WeatherSearchBar extends StatefulWidget {
   final ValueChanged<String> onSearch;
+  final VoidCallback? onCurrentLocation;
   final bool isLoading;
 
   const WeatherSearchBar({
     super.key,
     required this.onSearch,
+    this.onCurrentLocation,
     this.isLoading = false,
   });
 
@@ -76,7 +78,7 @@ class _WeatherSearchBarState extends State<WeatherSearchBar> {
                     ? AppColors.darkTextSecondary
                     : AppColors.lightTextSecondary,
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           Expanded(
             child: TextField(
               controller: _controller,
@@ -92,7 +94,7 @@ class _WeatherSearchBarState extends State<WeatherSearchBar> {
                         : AppColors.lightTextPrimary,
               ),
               decoration: const InputDecoration(
-                hintText: 'Search city (e.g. Tokyo, London, Berlin)...',
+                hintText: 'Search city (e.g. Tokyo, Berlin)...',
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
@@ -103,6 +105,7 @@ class _WeatherSearchBarState extends State<WeatherSearchBar> {
           ),
           if (_hasText)
             IconButton(
+              tooltip: 'Clear Input',
               icon: const Icon(Icons.close_rounded, size: 18),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
@@ -112,6 +115,19 @@ class _WeatherSearchBarState extends State<WeatherSearchBar> {
                       ? AppColors.darkTextSecondary
                       : AppColors.lightTextSecondary,
               onPressed: _clear,
+            ),
+          if (widget.onCurrentLocation != null)
+            IconButton(
+              tooltip: 'Use Device GPS Location',
+              icon: const Icon(Icons.my_location_rounded, size: 18),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              splashRadius: 16,
+              color:
+                  isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.lightTextSecondary,
+              onPressed: widget.isLoading ? null : widget.onCurrentLocation,
             ),
           const SizedBox(width: 4),
           InkWell(

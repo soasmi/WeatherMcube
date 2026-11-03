@@ -5,6 +5,7 @@ import '../../../core/errors/app_exceptions.dart';
 import '../../../data/models/location_item.dart';
 import '../../../data/models/weather_data.dart';
 import '../../../data/repositories/weather_repository.dart';
+import '../../../data/services/location_service.dart';
 import '../../../data/services/open_meteo_api_client.dart';
 import '../../../data/services/weather_storage_service.dart';
 import 'weather_state.dart';
@@ -17,6 +18,10 @@ final openMeteoApiClientProvider = Provider<OpenMeteoApiClient>((ref) {
   final client = OpenMeteoApiClient();
   ref.onDispose(client.close);
   return client;
+});
+
+final locationServiceProvider = Provider<LocationService>((ref) {
+  return LocationService();
 });
 
 final weatherStorageServiceProvider = Provider<WeatherStorageService>((ref) {
@@ -110,6 +115,34 @@ class WeatherNotifier extends Notifier<WeatherState> {
       if (requestId != _currentRequestId) return;
       state = WeatherErrorState(
         message: 'An unexpected error occurred. Please try again.',
+        cachedData: previousData,
+      );
+    }
+  }
+
+  Future<void> fetchCurrentLocationWeather() async {
+    final requestId = ++_currentRequestId;
+    final previousData = _currentData;
+    state = const WeatherSearchingLocationsState('Current GPS Location');
+
+    try {
+      final locService = ref.read(locationServiceProvider);
+      final deviceLocation = await locService.getCurrentDeviceLocation();
+      if (requestId != _currentRequestId) return;
+
+      await selectLocation(deviceLocation);
+    } on WeatherException catch (e) {
+      if (requestId != _currentRequestId) return;
+      state = WeatherErrorState(
+        message: e.message,
+        isNetworkError: e.isNetworkError,
+        isNotFound: e.isNotFound,
+        cachedData: previousData,
+      );
+    } catch (e) {
+      if (requestId != _currentRequestId) return;
+      state = WeatherErrorState(
+        message: 'Could not acquire GPS position: $e',
         cachedData: previousData,
       );
     }
