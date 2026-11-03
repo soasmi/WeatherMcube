@@ -8,7 +8,7 @@ class ApiConstants {
 
   static const int geocodingCount = 5;
   static const int forecastDays = 5;
-  static const Duration requestTimeout = Duration(seconds: 10);
+  static const Duration requestTimeout = Duration(seconds: 15);
 
   static const String currentParameters =
       'temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m';

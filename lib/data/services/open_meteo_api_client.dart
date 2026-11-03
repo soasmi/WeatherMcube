@@ -11,8 +11,11 @@ import '../models/weather_data.dart';
 
 class OpenMeteoApiClient {
   final http.Client _client;
+  final Duration _timeout;
 
-  OpenMeteoApiClient({http.Client? client}) : _client = client ?? http.Client();
+  OpenMeteoApiClient({http.Client? client, Duration? timeout})
+      : _client = client ?? http.Client(),
+        _timeout = timeout ?? ApiConstants.requestTimeout;
 
   Future<List<LocationItem>> searchCities(String query) async {
     final sanitized = query.trim();
@@ -25,9 +28,7 @@ class OpenMeteoApiClient {
     );
 
     try {
-      final response = await _client
-          .get(uri)
-          .timeout(ApiConstants.requestTimeout);
+      final response = await _client.get(uri).timeout(_timeout);
 
       if (response.statusCode != 200) {
         throw WeatherException.serverError(response.statusCode);
@@ -75,9 +76,7 @@ class OpenMeteoApiClient {
     ).replace(queryParameters: queryParams);
 
     try {
-      final response = await _client
-          .get(uri)
-          .timeout(ApiConstants.requestTimeout);
+      final response = await _client.get(uri).timeout(_timeout);
 
       if (response.statusCode != 200) {
         throw WeatherException.serverError(response.statusCode);
