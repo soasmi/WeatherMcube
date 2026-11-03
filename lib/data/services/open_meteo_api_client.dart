@@ -14,8 +14,8 @@ class OpenMeteoApiClient {
   final Duration _timeout;
 
   OpenMeteoApiClient({http.Client? client, Duration? timeout})
-      : _client = client ?? http.Client(),
-        _timeout = timeout ?? ApiConstants.requestTimeout;
+    : _client = client ?? http.Client(),
+      _timeout = timeout ?? ApiConstants.requestTimeout;
 
   Future<List<LocationItem>> searchCities(String query) async {
     final sanitized = query.trim();

@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:weather_mcube/data/models/location_item.dart';
 import 'package:weather_mcube/data/repositories/weather_repository.dart';
 import 'package:weather_mcube/data/services/open_meteo_api_client.dart';
 import 'package:weather_mcube/data/services/weather_storage_service.dart';
