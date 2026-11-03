@@ -71,12 +71,12 @@ class WeatherData {
   }
 
   Map<String, dynamic> toJson() => {
-        'location': location.toJson(),
-        'current': current.toJson(),
-        'daily_forecast': dailyForecast.map((d) => d.toJson()).toList(),
-        'fetched_at': fetchedAt.toIso8601String(),
-        'is_from_cache': isFromCache,
-      };
+    'location': location.toJson(),
+    'current': current.toJson(),
+    'daily_forecast': dailyForecast.map((d) => d.toJson()).toList(),
+    'fetched_at': fetchedAt.toIso8601String(),
+    'is_from_cache': isFromCache,
+  };
 
   factory WeatherData.fromJson(Map<String, dynamic> json) {
     final forecastList = (json['daily_forecast'] as List?) ?? [];
@@ -87,13 +87,19 @@ class WeatherData {
       current: CurrentWeather.fromJson(
         Map<String, dynamic>.from(json['current'] as Map? ?? {}),
       ),
-      dailyForecast: forecastList
-          .map((item) =>
-              ForecastDay.fromJson(Map<String, dynamic>.from(item as Map)))
-          .toList(),
-      fetchedAt: json['fetched_at'] != null
-          ? DateTime.tryParse(json['fetched_at'].toString()) ?? DateTime.now()
-          : DateTime.now(),
+      dailyForecast:
+          forecastList
+              .map(
+                (item) => ForecastDay.fromJson(
+                  Map<String, dynamic>.from(item as Map),
+                ),
+              )
+              .toList(),
+      fetchedAt:
+          json['fetched_at'] != null
+              ? DateTime.tryParse(json['fetched_at'].toString()) ??
+                  DateTime.now()
+              : DateTime.now(),
       isFromCache: json['is_from_cache'] as bool? ?? true,
     );
   }

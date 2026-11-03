@@ -7,7 +7,6 @@ import '../../../data/models/weather_data.dart';
 import '../../../data/repositories/weather_repository.dart';
 import '../../../data/services/open_meteo_api_client.dart';
 import '../../../data/services/weather_storage_service.dart';
-import 'settings_provider.dart';
 import 'weather_state.dart';
 
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
@@ -34,61 +33,50 @@ final weatherRepositoryProvider = Provider<WeatherRepository>((ref) {
   );
 });
 
-final settingsProvider =
-    StateNotifierProvider<SettingsNotifier, SettingsState>((ref) {
-  final storage = ref.watch(weatherStorageServiceProvider);
-  return SettingsNotifier(storage);
-});
-
 final recentSearchesProvider = Provider<List<LocationItem>>((ref) {
   ref.watch(weatherNotifierProvider);
   final repo = ref.watch(weatherRepositoryProvider);
   return repo.getRecentLocations();
 });
 
-final weatherNotifierProvider =
-    StateNotifierProvider<WeatherNotifier, WeatherState>((ref) {
-  final repo = ref.watch(weatherRepositoryProvider);
-  return WeatherNotifier(repo);
-});
-
-class WeatherNotifier extends StateNotifier<WeatherState> {
-  final WeatherRepository _repository;
+class WeatherNotifier extends Notifier<WeatherState> {
   int _currentRequestId = 0;
 
-  WeatherNotifier(this._repository) : super(const WeatherInitialState()) {
-    _restoreCachedWeather();
+  @override
+  WeatherState build() {
+    final repo = ref.watch(weatherRepositoryProvider);
+    final cached = repo.getCachedWeather();
+    if (cached != null) {
+      return WeatherSuccessState(cached.copyWith(isFromCache: true));
+    }
+    return const WeatherInitialState();
   }
 
   WeatherData? get _currentData {
-    return switch (state) {
-      WeatherSuccessState(:final weatherData) => weatherData,
-      WeatherLoadingDataState(:final previousData) => previousData,
-      WeatherLocationsDisambiguationState(:final previousData) => previousData,
-      WeatherErrorState(:final cachedData) => cachedData,
-      _ => null,
-    };
-  }
-
-  void _restoreCachedWeather() {
-    final cached = _repository.getCachedWeather();
-    if (cached != null) {
-      state = WeatherSuccessState(cached.copyWith(isFromCache: true));
-    } else {
-      state = const WeatherInitialState();
+    final currentState = state;
+    if (currentState is WeatherSuccessState) {
+      return currentState.weatherData;
+    } else if (currentState is WeatherLoadingDataState) {
+      return currentState.previousData;
+    } else if (currentState is WeatherLocationsDisambiguationState) {
+      return currentState.previousData;
+    } else if (currentState is WeatherErrorState) {
+      return currentState.cachedData;
     }
+    return null;
   }
 
   Future<void> searchCity(String query) async {
     final trimmed = query.trim();
     if (trimmed.isEmpty) return;
 
+    final repo = ref.read(weatherRepositoryProvider);
     final requestId = ++_currentRequestId;
     final previousData = _currentData;
     state = WeatherSearchingLocationsState(trimmed);
 
     try {
-      final results = await _repository.searchLocations(trimmed);
+      final results = await repo.searchLocations(trimmed);
       if (requestId != _currentRequestId) return;
 
       if (results.isEmpty) {
@@ -128,6 +116,7 @@ class WeatherNotifier extends StateNotifier<WeatherState> {
   }
 
   Future<void> selectLocation(LocationItem location) async {
+    final repo = ref.read(weatherRepositoryProvider);
     final requestId = ++_currentRequestId;
     final previousData = _currentData;
     state = WeatherLoadingDataState(
@@ -136,7 +125,7 @@ class WeatherNotifier extends StateNotifier<WeatherState> {
     );
 
     try {
-      final weather = await _repository.fetchWeather(location: location);
+      final weather = await repo.fetchWeather(location: location);
       if (requestId != _currentRequestId) return;
 
       state = WeatherSuccessState(weather);
@@ -176,3 +165,7 @@ class WeatherNotifier extends StateNotifier<WeatherState> {
     state = const WeatherInitialState();
   }
 }
+
+final weatherNotifierProvider = NotifierProvider<WeatherNotifier, WeatherState>(
+  WeatherNotifier.new,
+);

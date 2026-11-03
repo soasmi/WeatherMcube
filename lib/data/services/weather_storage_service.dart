@@ -35,11 +35,15 @@ class WeatherStorageService {
 
   Future<void> addRecentLocation(LocationItem item) async {
     final currentList = getRecentLocations();
-    final updated = [
-      item,
-      ...currentList.where((loc) =>
-          loc.latitude != item.latitude || loc.longitude != item.longitude),
-    ].take(6).toList();
+    final updated =
+        [
+          item,
+          ...currentList.where(
+            (loc) =>
+                loc.latitude != item.latitude ||
+                loc.longitude != item.longitude,
+          ),
+        ].take(6).toList();
 
     final jsonList = updated.map((e) => jsonEncode(e.toJson())).toList();
     await _prefs.setStringList(_recentLocationsKey, jsonList);

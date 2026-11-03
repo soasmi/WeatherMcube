@@ -2,21 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/temperature_formatter.dart';
-import '../../../data/services/weather_storage_service.dart';
+import 'weather_provider.dart';
 
 class SettingsState {
   final TemperatureUnit unit;
   final ThemeMode themeMode;
 
-  const SettingsState({
-    required this.unit,
-    required this.themeMode,
-  });
+  const SettingsState({required this.unit, required this.themeMode});
 
-  SettingsState copyWith({
-    TemperatureUnit? unit,
-    ThemeMode? themeMode,
-  }) {
+  SettingsState copyWith({TemperatureUnit? unit, ThemeMode? themeMode}) {
     return SettingsState(
       unit: unit ?? this.unit,
       themeMode: themeMode ?? this.themeMode,
@@ -24,16 +18,15 @@ class SettingsState {
   }
 }
 
-class SettingsNotifier extends StateNotifier<SettingsState> {
-  final WeatherStorageService _storageService;
-
-  SettingsNotifier(this._storageService)
-      : super(
-          SettingsState(
-            unit: _parseUnit(_storageService.getTemperatureUnit()),
-            themeMode: _parseThemeMode(_storageService.getThemeMode()),
-          ),
-        );
+class SettingsNotifier extends Notifier<SettingsState> {
+  @override
+  SettingsState build() {
+    final storage = ref.watch(weatherStorageServiceProvider);
+    return SettingsState(
+      unit: _parseUnit(storage.getTemperatureUnit()),
+      themeMode: _parseThemeMode(storage.getThemeMode()),
+    );
+  }
 
   static TemperatureUnit _parseUnit(String? raw) {
     if (raw == 'fahrenheit') return TemperatureUnit.fahrenheit;
@@ -49,16 +42,17 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   }
 
   void toggleTemperatureUnit() {
-    final next = state.unit == TemperatureUnit.celsius
-        ? TemperatureUnit.fahrenheit
-        : TemperatureUnit.celsius;
+    final next =
+        state.unit == TemperatureUnit.celsius
+            ? TemperatureUnit.fahrenheit
+            : TemperatureUnit.celsius;
     state = state.copyWith(unit: next);
-    _storageService.saveTemperatureUnit(next.name);
+    ref.read(weatherStorageServiceProvider).saveTemperatureUnit(next.name);
   }
 
   void setThemeMode(ThemeMode mode) {
     state = state.copyWith(themeMode: mode);
-    _storageService.saveThemeMode(mode.name);
+    ref.read(weatherStorageServiceProvider).saveThemeMode(mode.name);
   }
 
   void cycleThemeMode() {
@@ -70,3 +64,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     setThemeMode(next);
   }
 }
+
+final settingsProvider = NotifierProvider<SettingsNotifier, SettingsState>(
+  SettingsNotifier.new,
+);

@@ -63,8 +63,10 @@ class AppTheme {
           fontSize: 14,
           letterSpacing: 0.2,
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: AppColors.darkBorder),
@@ -157,8 +159,10 @@ class AppTheme {
           fontSize: 14,
           letterSpacing: 0.2,
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: AppColors.lightBorder),
@@ -169,8 +173,10 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide:
-              const BorderSide(color: AppColors.lightAccent, width: 1.5),
+          borderSide: const BorderSide(
+            color: AppColors.lightAccent,
+            width: 1.5,
+          ),
         ),
       ),
       dividerTheme: const DividerThemeData(

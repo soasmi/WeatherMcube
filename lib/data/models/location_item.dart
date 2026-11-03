@@ -30,7 +30,8 @@ class LocationItem {
 
   factory LocationItem.fromJson(Map<String, dynamic> json) {
     return LocationItem(
-      id: (json['id'] as num?)?.toInt() ??
+      id:
+          (json['id'] as num?)?.toInt() ??
           DateTime.now().microsecondsSinceEpoch,
       name: (json['name'] as String?)?.trim() ?? 'Unknown Location',
       latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
@@ -42,14 +43,14 @@ class LocationItem {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'latitude': latitude,
-        'longitude': longitude,
-        'country': country,
-        'admin1': admin1,
-        'country_code': countryCode,
-      };
+    'id': id,
+    'name': name,
+    'latitude': latitude,
+    'longitude': longitude,
+    'country': country,
+    'admin1': admin1,
+    'country_code': countryCode,
+  };
 
   @override
   bool operator ==(Object other) =>

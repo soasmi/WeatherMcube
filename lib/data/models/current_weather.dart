@@ -15,9 +15,10 @@ class CurrentWeather {
 
   factory CurrentWeather.fromJson(Map<String, dynamic> json) {
     return CurrentWeather(
-      time: json['time'] != null
-          ? DateTime.tryParse(json['time'].toString()) ?? DateTime.now()
-          : DateTime.now(),
+      time:
+          json['time'] != null
+              ? DateTime.tryParse(json['time'].toString()) ?? DateTime.now()
+              : DateTime.now(),
       temperature: (json['temperature_2m'] as num?)?.toDouble() ?? 0.0,
       relativeHumidity: (json['relative_humidity_2m'] as num?)?.toInt() ?? 0,
       weatherCode: (json['weather_code'] as num?)?.toInt() ?? -1,
@@ -26,10 +27,10 @@ class CurrentWeather {
   }
 
   Map<String, dynamic> toJson() => {
-        'time': time.toIso8601String(),
-        'temperature_2m': temperature,
-        'relative_humidity_2m': relativeHumidity,
-        'weather_code': weatherCode,
-        'wind_speed_10m': windSpeed,
-      };
+    'time': time.toIso8601String(),
+    'temperature_2m': temperature,
+    'relative_humidity_2m': relativeHumidity,
+    'weather_code': weatherCode,
+    'wind_speed_10m': windSpeed,
+  };
 }

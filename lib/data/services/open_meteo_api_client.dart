@@ -25,8 +25,9 @@ class OpenMeteoApiClient {
     );
 
     try {
-      final response =
-          await _client.get(uri).timeout(ApiConstants.requestTimeout);
+      final response = await _client
+          .get(uri)
+          .timeout(ApiConstants.requestTimeout);
 
       if (response.statusCode != 200) {
         throw WeatherException.serverError(response.statusCode);
@@ -69,12 +70,14 @@ class OpenMeteoApiClient {
       'timezone': ApiConstants.defaultTimezone,
     };
 
-    final uri =
-        Uri.parse(ApiConstants.forecastBaseUrl).replace(queryParameters: queryParams);
+    final uri = Uri.parse(
+      ApiConstants.forecastBaseUrl,
+    ).replace(queryParameters: queryParams);
 
     try {
-      final response =
-          await _client.get(uri).timeout(ApiConstants.requestTimeout);
+      final response = await _client
+          .get(uri)
+          .timeout(ApiConstants.requestTimeout);
 
       if (response.statusCode != 200) {
         throw WeatherException.serverError(response.statusCode);

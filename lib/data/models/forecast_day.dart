@@ -27,9 +27,10 @@ class ForecastDay {
 
   factory ForecastDay.fromJson(Map<String, dynamic> json) {
     return ForecastDay(
-      date: json['date'] != null
-          ? DateTime.tryParse(json['date'].toString()) ?? DateTime.now()
-          : DateTime.now(),
+      date:
+          json['date'] != null
+              ? DateTime.tryParse(json['date'].toString()) ?? DateTime.now()
+              : DateTime.now(),
       weatherCode: (json['weather_code'] as num?)?.toInt() ?? -1,
       maxTemp: (json['max_temp'] as num?)?.toDouble() ?? 0.0,
       minTemp: (json['min_temp'] as num?)?.toDouble() ?? 0.0,
@@ -37,9 +38,9 @@ class ForecastDay {
   }
 
   Map<String, dynamic> toJson() => {
-        'date': date.toIso8601String(),
-        'weather_code': weatherCode,
-        'max_temp': maxTemp,
-        'min_temp': minTemp,
-      };
+    'date': date.toIso8601String(),
+    'weather_code': weatherCode,
+    'max_temp': maxTemp,
+    'min_temp': minTemp,
+  };
 }

@@ -11,8 +11,8 @@ class WeatherRepository {
   WeatherRepository({
     required OpenMeteoApiClient apiClient,
     required WeatherStorageService storageService,
-  })  : _apiClient = apiClient,
-        _storageService = storageService;
+  }) : _apiClient = apiClient,
+       _storageService = storageService;
 
   Future<List<LocationItem>> searchLocations(String query) async {
     return await _apiClient.searchCities(query);

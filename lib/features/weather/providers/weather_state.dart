@@ -30,10 +30,7 @@ class WeatherLoadingDataState extends WeatherState {
   final LocationItem location;
   final WeatherData? previousData;
 
-  const WeatherLoadingDataState({
-    required this.location,
-    this.previousData,
-  });
+  const WeatherLoadingDataState({required this.location, this.previousData});
 }
 
 class WeatherSuccessState extends WeatherState {
