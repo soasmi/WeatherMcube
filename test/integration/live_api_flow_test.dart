@@ -31,6 +31,9 @@ void main() {
       expect(weather.current.relativeHumidity, greaterThanOrEqualTo(0));
       expect(weather.current.windSpeed, greaterThanOrEqualTo(0));
       expect(weather.dailyForecast.length, equals(5));
+      expect(weather.hourlyForecast, isNotEmpty);
+      expect(weather.current.apparentTemperature, isNotNull);
+      expect(weather.current.surfacePressure, greaterThan(800.0));
       expect(weather.isFromCache, isFalse);
 
       // 3. Verify local cache was populated
