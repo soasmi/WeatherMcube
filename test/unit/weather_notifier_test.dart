@@ -43,6 +43,8 @@ class FakeWeatherRepository extends WeatherRepository {
         relativeHumidity: 55,
         weatherCode: 0,
         windSpeed: 10.0,
+        apparentTemperature: 21.0,
+        surfacePressure: 1014.0,
       ),
       dailyForecast: [
         ForecastDay(

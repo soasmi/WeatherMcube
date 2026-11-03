@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weather_mcube/data/models/current_weather.dart';
 import 'package:weather_mcube/data/models/forecast_day.dart';
+import 'package:weather_mcube/data/models/hourly_forecast_item.dart';
 import 'package:weather_mcube/data/models/location_item.dart';
 import 'package:weather_mcube/data/models/weather_data.dart';
 
@@ -47,6 +48,8 @@ void main() {
         'relative_humidity_2m': 65,
         'weather_code': 3,
         'wind_speed_10m': 18.2,
+        'apparent_temperature': 12.8,
+        'surface_pressure': 1024.0,
       };
 
       final current = CurrentWeather.fromJson(json);
@@ -54,6 +57,8 @@ void main() {
       expect(current.relativeHumidity, 65);
       expect(current.weatherCode, 3);
       expect(current.windSpeed, 18.2);
+      expect(current.apparentTemperature, 12.8);
+      expect(current.surfacePressure, 1024.0);
     });
 
     test('ForecastDay parses parallel arrays safely', () {
@@ -62,12 +67,37 @@ void main() {
         rawCode: 61,
         rawMax: 16.8,
         rawMin: 8.2,
+        rawUvMax: 4.5,
+        rawPrecipSum: 1.2,
       );
 
       expect(day.weatherCode, 61);
       expect(day.maxTemp, 16.8);
       expect(day.minTemp, 8.2);
+      expect(day.uvIndexMax, 4.5);
+      expect(day.precipitationSum, 1.2);
     });
+
+    test(
+      'HourlyForecastItem parses parallel arrays and calculates UV risk',
+      () {
+        final item = HourlyForecastItem.fromParallelArrays(
+          timeString: '2026-11-03T14:00',
+          rawTemp: 18.5,
+          rawHumidity: 55,
+          rawPrecipProb: 40,
+          rawCode: 80,
+          rawUv: 6.5,
+        );
+
+        expect(item.temperature, 18.5);
+        expect(item.humidity, 55);
+        expect(item.precipitationProbability, 40);
+        expect(item.weatherCode, 80);
+        expect(item.uvIndex, 6.5);
+        expect(item.uvRiskLevel, 'HIGH');
+      },
+    );
 
     test(
       'WeatherData serializes to JSON and restores accurately for cache',
@@ -88,6 +118,8 @@ void main() {
           relativeHumidity: 50,
           weatherCode: 0,
           windSpeed: 8.5,
+          apparentTemperature: 18.0,
+          surfacePressure: 1018.0,
         );
 
         final forecast = [
@@ -96,12 +128,19 @@ void main() {
             weatherCode: 0,
             maxTemp: 20.0,
             minTemp: 12.0,
+            uvIndexMax: 5.0,
+            precipitationSum: 0.0,
           ),
-          ForecastDay(
-            date: DateTime.parse('2026-11-04'),
-            weatherCode: 2,
-            maxTemp: 21.0,
-            minTemp: 13.0,
+        ];
+
+        final hourly = [
+          HourlyForecastItem(
+            time: DateTime.parse('2026-11-03T12:00:00'),
+            temperature: 19.0,
+            humidity: 50,
+            precipitationProbability: 10,
+            weatherCode: 0,
+            uvIndex: 4.0,
           ),
         ];
 
@@ -109,6 +148,7 @@ void main() {
           location: location,
           current: current,
           dailyForecast: forecast,
+          hourlyForecast: hourly,
           fetchedAt: DateTime.parse('2026-11-03T12:00:00'),
           isFromCache: false,
         );
@@ -119,8 +159,10 @@ void main() {
         expect(restored.location.name, 'Tokyo');
         expect(restored.location.latitude, 35.68);
         expect(restored.current.temperature, 19.0);
-        expect(restored.dailyForecast.length, 2);
-        expect(restored.dailyForecast[1].maxTemp, 21.0);
+        expect(restored.current.apparentTemperature, 18.0);
+        expect(restored.dailyForecast.length, 1);
+        expect(restored.hourlyForecast.length, 1);
+        expect(restored.hourlyForecast.first.uvRiskLevel, 'MODERATE');
       },
     );
   });

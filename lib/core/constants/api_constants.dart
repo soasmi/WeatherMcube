@@ -11,8 +11,10 @@ class ApiConstants {
   static const Duration requestTimeout = Duration(seconds: 15);
 
   static const String currentParameters =
-      'temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m';
+      'temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,surface_pressure';
+  static const String hourlyParameters =
+      'temperature_2m,relative_humidity_2m,precipitation_probability,weather_code,uv_index';
   static const String dailyParameters =
-      'weather_code,temperature_2m_max,temperature_2m_min';
+      'weather_code,temperature_2m_max,temperature_2m_min,uv_index_max,precipitation_sum';
   static const String defaultTimezone = 'auto';
 }

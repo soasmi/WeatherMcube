@@ -80,6 +80,8 @@ void main() {
             relativeHumidity: 70,
             weatherCode: 0,
             windSpeed: 5.0,
+            apparentTemperature: 8.5,
+            surfacePressure: 1015.0,
           ),
           dailyForecast: [
             ForecastDay(

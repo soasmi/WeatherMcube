@@ -66,6 +66,7 @@ class OpenMeteoApiClient {
       'latitude': location.latitude.toString(),
       'longitude': location.longitude.toString(),
       'current': ApiConstants.currentParameters,
+      'hourly': ApiConstants.hourlyParameters,
       'daily': ApiConstants.dailyParameters,
       'forecast_days': ApiConstants.forecastDays.toString(),
       'timezone': ApiConstants.defaultTimezone,
