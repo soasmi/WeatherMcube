@@ -26,12 +26,19 @@ class CurrentWeatherView extends StatelessWidget {
     return 'GALE FORCE';
   }
 
+  String _getPressureStatus(double hpa) {
+    if (hpa < 1000) return 'LOW PRESSURE';
+    if (hpa <= 1020) return 'NORMAL BARO';
+    return 'HIGH PRESSURE';
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surfaceColor =
         isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final borderColor = isDark ? AppColors.darkBorder : AppColors.lightBorder;
+    final cardColor = isDark ? AppColors.darkCard : AppColors.lightCard;
     final accentColor = isDark ? AppColors.darkAccent : AppColors.lightAccent;
 
     final condition = WmoCodeMapper.map(data.current.weatherCode);
@@ -39,8 +46,14 @@ class CurrentWeatherView extends StatelessWidget {
       data.current.temperature,
       unit,
     );
+    final feelsLikeStr = WeatherUnits.formatTemperature(
+      data.current.apparentTemperature,
+      unit,
+    );
     final windStr = WeatherUnits.formatWindSpeed(data.current.windSpeed, unit);
     final humidityStr = '${data.current.relativeHumidity}%';
+    final pressureStr =
+        '${data.current.surfacePressure.toStringAsFixed(0)} hPa';
     final formattedTime = DateFormat(
       'EEEE, MMM d • HH:mm',
     ).format(data.current.time);
@@ -93,10 +106,7 @@ class CurrentWeatherView extends StatelessWidget {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color:
-                                  isDark
-                                      ? AppColors.darkCard
-                                      : AppColors.lightCard,
+                              color: cardColor,
                               borderRadius: BorderRadius.circular(4),
                               border: Border.all(color: borderColor),
                             ),
@@ -244,7 +254,7 @@ class CurrentWeatherView extends StatelessWidget {
           Divider(color: borderColor, height: 1),
           const SizedBox(height: 16),
 
-          // Metrics Grid: Humidity and Wind Speed
+          // Row 1 Metrics: Humidity and Wind Speed
           Row(
             children: [
               // Humidity Metric
@@ -252,7 +262,7 @@ class CurrentWeatherView extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkCard : AppColors.lightCard,
+                    color: cardColor,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: borderColor),
                   ),
@@ -318,7 +328,7 @@ class CurrentWeatherView extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkCard : AppColors.lightCard,
+                    color: cardColor,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: borderColor),
                   ),
@@ -367,6 +377,145 @@ class CurrentWeatherView extends StatelessWidget {
                         _getWindStatus(data.current.windSpeed),
                         style: TextStyle(
                           fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color:
+                              isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.lightTextSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // Row 2 Metrics: Apparent Temp & Atmospheric Pressure
+          Row(
+            children: [
+              // Feels Like
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: cardColor,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: borderColor),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.thermostat_outlined,
+                            size: 15,
+                            color:
+                                isDark
+                                    ? AppColors.darkTextSecondary
+                                    : AppColors.lightTextSecondary,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'FEELS LIKE',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.0,
+                              color:
+                                  isDark
+                                      ? AppColors.darkTextTertiary
+                                      : AppColors.lightTextTertiary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        feelsLikeStr,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color:
+                              isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.lightTextPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'CALCULATED HEAT/CHILL',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w700,
+                          color:
+                              isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.lightTextSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Pressure
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: cardColor,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: borderColor),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.speed_rounded,
+                            size: 15,
+                            color:
+                                isDark
+                                    ? AppColors.darkTextSecondary
+                                    : AppColors.lightTextSecondary,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'PRESSURE',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.0,
+                              color:
+                                  isDark
+                                      ? AppColors.darkTextTertiary
+                                      : AppColors.lightTextTertiary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        pressureStr,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color:
+                              isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.lightTextPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        _getPressureStatus(data.current.surfacePressure),
+                        style: TextStyle(
+                          fontSize: 9,
                           fontWeight: FontWeight.w700,
                           color:
                               isDark

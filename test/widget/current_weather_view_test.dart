@@ -24,6 +24,8 @@ void main() {
         relativeHumidity: 60,
         weatherCode: 0,
         windSpeed: 15.0,
+        apparentTemperature: 21.0,
+        surfacePressure: 1013.0,
       ),
       dailyForecast: [
         ForecastDay(
